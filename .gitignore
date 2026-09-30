@@ -216,3 +216,27 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# --- Proyecto agente LangChain ---
+
+# Variantes de .env (el template solo ignora ".env" exacto)
+.env.*
+!.env.example
+
+# Claves y certificados
+*.key
+*.pem
+
+# Editores / SO
+.cursor/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Bases de datos locales (checkpoints de LangGraph, memoria del agente, etc.)
+*.sqlite
+*.db
+
+# Vector stores locales, por si más adelante agregás RAG
+chroma_db/
+faiss_index/
