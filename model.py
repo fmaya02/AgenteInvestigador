@@ -28,6 +28,20 @@ def get_model() -> BaseChatModel:
             temperature=0,
         )
 
+    if provider == "openrouter":
+        if not os.getenv("OPENROUTER_API_KEY"):
+            raise RuntimeError(
+                "Falta OPENROUTER_API_KEY. Copiá .env.example a .env y completalo."
+            )
+        from langchain_openrouter import ChatOpenRouter
+
+        # ChatOpenRouter lee OPENROUTER_API_KEY del entorno automáticamente.
+        return ChatOpenRouter(
+            model=name,
+            temperature=0,
+            reasoning={"effort": "high", "summary": "auto"},
+        )
+
     if provider == "google_genai" and not os.getenv("GOOGLE_API_KEY"):
         raise RuntimeError(
             "Falta GOOGLE_API_KEY. Copiá .env.example a .env y completalo."
