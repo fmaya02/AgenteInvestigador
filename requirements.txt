@@ -10,3 +10,6 @@ langchain-openrouter==0.2.9
 
 # Tools
 langchain-tavily>=0.2   # Búsqueda web (Tavily)
+
+# UI
+streamlit>=1.40
