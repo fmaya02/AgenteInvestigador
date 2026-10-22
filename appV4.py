@@ -39,7 +39,7 @@ def render_details(r: TurnResult) -> None:
 
 
 def render_sidebar() -> None:
-    """Muestra la memoria del agente (TODOs y notas) al final del último turno."""
+    """Muestra la memoria del agente (TODOs) al final del último turno."""
     ultimo: TurnResult | None = st.session_state.ultimo
     with st.sidebar:
         st.header("Memoria del agente")
@@ -50,14 +50,6 @@ def render_sidebar() -> None:
                 st.markdown(f"{ICONOS.get(t['status'], '•')} {t['task']}")
         else:
             st.caption("Todavía no hay TODOs.")
-
-        st.subheader("Notas")
-        if ultimo and ultimo.notes:
-            for key, text in ultimo.notes.items():
-                with st.expander(f"{key} ({len(text)} caracteres)"):
-                    st.markdown(text)
-        else:
-            st.caption("Todavía no hay notas.")
 
         if st.button("Nueva conversación"):
             st.session_state.clear()   # el próximo rerun llama a init_session()

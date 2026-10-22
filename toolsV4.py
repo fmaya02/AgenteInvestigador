@@ -15,8 +15,6 @@ from langchain.tools import ToolRuntime, tool
 from langgraph.types import Command
 from typing_extensions import TypedDict
 
-MAX_NOTAS = 8          # cantidad máxima de notas guardadas en el estado
-MAX_CHARS_NOTA = 1500  # largo máximo de cada nota (el excedente se trunca)
 
 load_dotenv()
 
@@ -42,11 +40,6 @@ class Todo(TypedDict):
     status: Literal["pending", "in_progress", "done"]
 
 
-def _merge_notes(actuales: dict | None, nuevas: dict) -> dict:
-    """Reducer: combina las notas nuevas con las existentes en vez de pisarlas."""
-    return {**(actuales or {}), **nuevas}
-
-
 def _merge_sources(actuales: list | None, nuevas: list) -> list:
     """Reducer: acumula fuentes sin repetir la misma URL dentro de un turno."""
     por_clave = {(s["turn"], s["url"]): s for s in (actuales or []) + nuevas}
@@ -54,9 +47,8 @@ def _merge_sources(actuales: list | None, nuevas: list) -> list:
 
 
 class ResearchState(AgentState):
-    """Estado del agente: `messages` (heredado) + TODOs + notas + fuentes."""
+    """Estado del agente: `messages` (heredado) + TODOs + fuentes."""
     todos: list[Todo]
-    notes: Annotated[dict[str, str], _merge_notes]
     sources: Annotated[list[dict], _merge_sources]   # fuentes, cada una con su turno
 
 
@@ -101,30 +93,4 @@ def read_todos(runtime: ToolRuntime[Context]) -> str:
     return "\n".join(f"[{t['status']}] {t['task']}" for t in todos)
 
 
-@tool
-def save_note(key: str, content: str, runtime: ToolRuntime[Context]) -> Command:
-    """Guarda un resultado intermedio (resumido) bajo una clave corta y descriptiva.
-
-    Si la clave ya existe, se sobrescribe. Hay un máximo de notas y de largo por
-    nota: guardá solo lo esencial (datos, cifras, URLs), no páginas completas.
-    """
-    notes = runtime.state.get("notes", {})
-    if key not in notes and len(notes) >= MAX_NOTAS:
-        return _respond(
-            runtime,
-            f"Límite de {MAX_NOTAS} notas alcanzado. Sobrescribí una existente: {list(notes)}.",
-        )
-    aviso = f" (truncada a {MAX_CHARS_NOTA} caracteres)" if len(content) > MAX_CHARS_NOTA else ""
-    return _respond(runtime, f"Nota '{key}' guardada{aviso}.", notes={key: content[:MAX_CHARS_NOTA]})
-
-
-@tool
-def read_notes(runtime: ToolRuntime[Context], key: str = "") -> str:
-    """Lee una nota por su clave. Sin clave, lista las claves disponibles."""
-    notes = runtime.state.get("notes", {})
-    if not key:
-        return f"Claves disponibles: {list(notes)}" if notes else "No hay notas."
-    return notes.get(key, f"No existe la nota '{key}'. Claves: {list(notes)}")
-
-
-TOOLS: list = [web_search, write_todos, read_todos, save_note, read_notes]
+TOOLS: list = [web_search, write_todos, read_todos]

@@ -31,15 +31,14 @@ SYSTEM_PROMPT = (
     f"reciente, incluí el año ({HOY.year}) en la consulta. Si buscás, citá las "
     "URLs de las fuentes que usaste. "
     "Ante una tarea de varios pasos, planificá primero con la lista de TODOs y "
-    "mantenela actualizada mientras avanzás. Guardá como notas los resultados "
-    "intermedios que vayas a necesitar después, para no repetir búsquedas."
+    "mantenela actualizada mientras avanzás."
 )
 
 agent = create_agent(
     model=get_model(),
     tools=TOOLS,
     system_prompt=SYSTEM_PROMPT,
-    state_schema=ResearchState,     # estado extendido: messages + todos + notes + sources
+    state_schema=ResearchState,     # estado extendido: messages + todos + sources
     context_schema=Context,         # datos de solo lectura por invocación (turno)
     checkpointer=InMemorySaver(),   # persiste el estado entre invocaciones (por thread)
 )
@@ -51,7 +50,6 @@ class TurnResult:
     answer: str
     reasoning: list[str]
     todos: list[Todo]
-    notes: dict[str, str]
     sources: list[dict]   # solo las fuentes consultadas en este turno
 
 
@@ -85,7 +83,6 @@ def run_turn(user_input: str, config: RunnableConfig, turno: int) -> TurnResult:
         answer=messages[-1].text,
         reasoning=_extract_reasoning(messages[ultimo_humano + 1:]),
         todos=result.get("todos", []),
-        notes=result.get("notes", {}),
         sources=[s for s in result.get("sources", []) if s["turn"] == turno],
     )
 
@@ -96,8 +93,6 @@ def print_turn(r: TurnResult) -> None:
         print(f"[razonamiento] {texto}\n")
     for t in r.todos:
         print(f"[TODO {t['status']}] {t['task']}")
-    for key, text in r.notes.items():
-        print(f"[nota '{key}'] {len(text)} caracteres")
     for s in r.sources:
         print(f"[fuente] {s['title']} - {s['url']}")
     print(f"Agente: {r.answer}\n")
