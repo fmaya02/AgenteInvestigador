@@ -244,3 +244,4 @@ faiss_index/
 # Mecanismos de memoria corto plazo
 memoria.db
 thread_actual.txt
+conversaciones.txt
