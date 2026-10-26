@@ -13,3 +13,6 @@ langchain-tavily>=0.2   # Búsqueda web (Tavily)
 
 # UI
 streamlit>=1.40
+
+# Memoria Corto Plazo
+langgraph-checkpoint-sqlite>=3.0

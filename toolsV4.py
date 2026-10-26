@@ -1,4 +1,4 @@
-"""Tools de la versión 4: búsqueda web + memoria de corto plazo (TODOs y notas).
+"""Tools de la versión 4: búsqueda web + memoria de corto plazo (mensajes + TODOs).
 
 Las tools leen el estado con `runtime.state` y lo escriben devolviendo un
 `Command(update=...)`. El checkpointer (ver agenteV4.py) persiste ese estado
