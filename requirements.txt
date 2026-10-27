@@ -16,3 +16,7 @@ streamlit>=1.40
 
 # Memoria Corto Plazo
 langgraph-checkpoint-sqlite>=3.0
+
+# RAG
+langchain-chroma>=1.0           # Base vectorial (ChromaDB)
+langchain-text-splitters>=1.0   # Chunking

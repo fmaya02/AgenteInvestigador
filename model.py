@@ -11,6 +11,16 @@ from langchain_core.language_models import BaseChatModel
 
 load_dotenv()
 
+def get_embeddings():
+    """Modelo de embeddings para el RAG: Google, vía API (capa gratuita)."""
+    if not os.getenv("GOOGLE_API_KEY"):
+        raise RuntimeError(
+            "Falta GOOGLE_API_KEY (también se usa para los embeddings del RAG). "
+            "Copiá .env.example a .env y completalo."
+        )
+    from langchain_google_genai import GoogleGenerativeAIEmbeddings
+
+    return GoogleGenerativeAIEmbeddings(model="gemini-embedding-001")
 
 def get_model() -> BaseChatModel:
     provider = os.getenv("MODEL_PROVIDER", "google_genai")
