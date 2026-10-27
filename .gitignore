@@ -245,3 +245,5 @@ faiss_index/
 memoria.db
 thread_actual.txt
 conversaciones.txt
+tectonic.exe
+output/
