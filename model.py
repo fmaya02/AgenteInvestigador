@@ -4,7 +4,7 @@ Los agentes (agenteV*.py) solo llaman a get_model(); no saben qué proveedor
 hay detrás. Para cambiar de modelo se editan las variables del .env.
 """
 import os
-
+from pydantic import SecretStr
 from dotenv import load_dotenv
 from langchain.chat_models import init_chat_model
 from langchain_core.language_models import BaseChatModel
@@ -27,14 +27,12 @@ def get_model() -> BaseChatModel:
     name = os.getenv("MODEL_NAME", "gemini-2.5-flash")
 
     if provider == "lmstudio":
-        # LM Studio imita la API de OpenAI, así que usamos el proveedor "openai"
-        # apuntando al servidor local. La api_key es obligatoria para el cliente,
-        # pero LM Studio la ignora, por eso va un valor cualquiera.
-        return init_chat_model(
-            name,
-            model_provider="openai",
+        from chat_lmstudio import ChatLMStudio
+
+        return ChatLMStudio(
+            model=name,
             base_url=os.getenv("LMSTUDIO_BASE_URL", "http://localhost:1234/v1"),
-            api_key="lm-studio",
+            api_key=SecretStr("lm-studio"),   # el cliente la exige, LM Studio la ignora
             temperature=0,
         )
 
@@ -52,9 +50,14 @@ def get_model() -> BaseChatModel:
             reasoning={"effort": "high", "summary": "auto"},
         )
 
-    if provider == "google_genai" and not os.getenv("GOOGLE_API_KEY"):
-        raise RuntimeError(
-            "Falta GOOGLE_API_KEY. Copiá .env.example a .env y completalo."
+    if provider == "google_genai":
+        if not os.getenv("GOOGLE_API_KEY"):
+            raise RuntimeError(
+                "Falta GOOGLE_API_KEY. Copiá .env.example a .env y completalo."
+            )
+        # include_thoughts=True: Gemini devuelve resúmenes de su razonamiento.
+        return init_chat_model(
+            name, model_provider=provider, temperature=0, include_thoughts=True
         )
 
     return init_chat_model(name, model_provider=provider, temperature=0)
